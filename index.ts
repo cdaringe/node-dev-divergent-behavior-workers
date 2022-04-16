@@ -1,27 +1,25 @@
 import * as jw from "jest-worker";
 import path from "path";
 
-const log = (msg: string) => console.log(`${__filename}: ${msg}`);
+const log = (msg: string) => console.log(`[demo]: ${msg}`);
 
 process.on("unhandledRejection", (err) => {
-  log(`im not emitted with node-dev, but expected to be. ${err}`);
+  log(`event - logged without node-dev, not logged with node-dev. ${err}`);
   process.exit(3);
 });
 
 async function go() {
   const workerModuleFilename = path.resolve(__dirname, "worker.js");
   const worker = new jw.Worker(workerModuleFilename);
-  log(`about to run method (${typeof (worker as any).fails})`);
-
+  const fn = (worker as any).fails as () => Promise<void>;
+  log(`running worker method (type: ${typeof fn})`);
   /**
    * This is where it breaks down.
    * `.fails()` is a method on the worker with a promise interface.
    * However, node-dev
    */
-  const result = await (worker as any).fails().catch((err: unknown) => {
-    log(
-      `this is logged when not using node-dev, but is not logged with node-dev ${err}`
-    );
+  await fn().catch((err: unknown) => {
+    log(`error - logged without node-dev, not logged with node-dev ${err}`);
     throw err;
   });
 }
