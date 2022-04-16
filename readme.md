@@ -1,4 +1,4 @@
-# node-dev worker bork
+# node-dev divergent behavior with worker
 
 ## demo
 
